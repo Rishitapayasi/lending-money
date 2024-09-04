@@ -1,0 +1,179 @@
+<div class="min-h-screen bg-[#E1C2AD] py-10 px-6">
+
+  <div class="w-full flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold">Lending Money with Interest</h2>
+    <%= link_to 'Log Out', destroy_user_session_path, data: { turbo_method: :delete }, class: 'bg-red-700 text-white font-semibold py-2 px-4 rounded hover:bg-red-800' %>
+  </div>
+
+  <h3 class="text-xl font-semibold mb-2">Welcome, <%= current_user.email %></h3>
+  <p class="mb-4">Your Wallet Balance: <%= number_to_currency(current_user.wallet_balance) %></p>
+
+  <% if current_user.is_admin %>
+    <h3 class="text-xl font-semibold mb-2">All Loan Requests</h3>
+    <table class="min-w-full border-collapse border border-gray-300 bg-black text-white">
+      <thead>
+        <tr class="bg-gray-800 text-white">
+          <th class="border border-black-300 px-4 py-2">User</th>
+          <th class="border border-black-300 px-4 py-2">Amount</th>
+          <th class="border border-black-300 px-4 py-2">State</th>
+          <th class="border border-black-300 px-4 py-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @loan_requests.each do |loan_request| %>
+          <tr>
+            <td class="border border-gray-300 px-4 py-2"><%= loan_request.user.email %></td>
+            <td class="border border-gray-300 px-4 py-2"><%= loan_request.amount %></td>
+            <td class="border border-gray-300 px-4 py-2"><%= loan_request.state %></td>
+            <td class="border border-gray-300 px-4 py-2 space-x-2">
+              <%= link_to 'Approve', approve_loan_request_path(loan_request), data: { turbo_method: :patch }, class: 'bg-green-700 text-white font-semibold py-1 px-2 rounded hover:bg-green-800' %>
+              <%= link_to 'Reject', reject_loan_request_path(loan_request), data: { turbo_method: :patch }, class: 'bg-red-700 text-white font-semibold py-1 px-2 rounded hover:bg-red-800' %>
+              <%= link_to 'Adjust', '#', class: 'bg-yellow-700 text-white font-semibold py-1 px-2 rounded hover:bg-yellow-800 adjust-loan-button', data: { loan_id: loan_request.id, loan_amount: loan_request.amount, loan_interest: loan_request.rate_of_interest }%>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <%= link_to 'New Loan Request', '#', id: 'loan-rq', class: 'bg-blue-700 text-white font-semibold py-2 px-4 rounded hover:bg-blue-800 mb-4'%>
+    <br></br>
+    <h3 class="text-xl font-semibold mb-2">Your Loan Requests</h3>
+    <table class="min-w-full border-collapse border border-gray-300 bg-black text-white">
+      <thead>
+        <tr class="bg-gray-800 text-white">
+          <th class="border border-gray-300 px-4 py-2">Amount</th>
+          <th class="border border-gray-300 px-4 py-2">State</th>
+          <th class="border border-gray-300 px-4 py-2">Rate of Interest</th>
+          <th class="border border-gray-300 px-4 py-2">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @loan_requests.each do |loan_request| %>
+          <tr>
+            <td class="border border-gray-300 px-4 py-2"><%= loan_request.amount %></td>
+            <td class="border border-gray-300 px-4 py-2"><%= loan_request.state %></td>
+            <td class="border border-gray-300 px-4 py-2"><%= loan_request.rate_of_interest %></td>
+            <td class="border border-gray-300 px-4 py-2">
+              <%= link_to 'show', loan_request_path(loan_request), class: 'bg-green-700 text-white font-semibold py-1 px-2 rounded hover:bg-green-800' %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+<div class="flex items-center justify-center min-h-screen px-4 text-center">
+  <div id="loan-request-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+    <div class="bg-white text-black rounded-lg shadow-lg p-6 w-full max-w-md">
+      <h3 class="text-xl font-bold mb-4">Request Loan</h3>
+        <%= form_with model: @loan_request, url: loan_requests_path, local: true, class: 'space-y-4' do |form| %>
+          <div>
+            <%= form.label :amount, 'Amount', class: 'block text-sm font-medium text-gray-700' %>
+            <%= form.number_field :amount, class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm' %>
+          </div>
+          <div>
+            <%= form.label :rate_of_interest, 'Rate of Interest (%)', class: 'block text-sm font-medium text-gray-700' %>
+            <%= form.number_field :rate_of_interest, step: 0.01, class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm' %>
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button type="button" id="cancel", class="bg-red-500 text-white font-semibold py-2 px-4 rounded hover:bg-red-600 mr-2">Cancel</button>
+            <%= form.submit 'Submit Request', id: "submit-loan", class: 'bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600' %>
+          </div>
+        <% end %>
+    </div>
+  </div>
+</div>
+
+  <div id="adjust-loan-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+    <div class="bg-white text-black rounded-lg shadow-lg p-6 w-full max-w-md">
+      <h3 class="text-xl font-bold mb-4">Adjust Loan</h3>
+      <%= form_with url: '#', method: :patch, local: true, class: 'space-y-4', id: 'adjust-loan-form' do |form| %>
+        <div>
+          <%= form.label :amount, 'Amount', class: 'block text-sm font-medium text-gray-700' %>
+          <%= form.number_field :amount, id: 'adjust-loan-amount', class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm' %>
+        </div>
+        <div>
+          <%= form.label :rate_of_interest, 'Rate of Interest (%)', class: 'block text-sm font-medium text-gray-700' %>
+          <%= form.number_field :rate_of_interest, step: 0.01, id: 'adjust-loan-interest', class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm' %>
+        </div>
+        <div class="flex justify-end">
+          <button type="button" id="cancel-adjust" class="bg-red-500 text-white font-semibold py-2 px-4 rounded hover:bg-red-600 mr-2">Cancel</button>
+          <%= form.submit 'Submit Adjustment', class: 'bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+
+    let modal = document.getElementById("loan-request-modal");
+    let loanRequestButton = document.getElementById("loan-rq");
+    let cancelButton = document.getElementById("cancel");
+    let adjustButtons = document.querySelectorAll(".adjust-loan-button");
+    let adjustModal = document.getElementById("adjust-loan-modal");
+    let cancelAdjustButton = document.getElementById("cancel-adjust");
+    let adjustLoanForm = document.getElementById("adjust-loan-form");
+    let adjustLoanAmount = document.getElementById("adjust-loan-amount");
+    let adjustLoanInterest = document.getElementById("adjust-loan-interest");
+
+    console.log('Loan Request Modal:', modal);
+    console.log('Loan Request Button:', loanRequestButton);
+    console.log('Cancel Button:', cancelButton);
+    console.log('Adjust Buttons:', adjustButtons);
+    console.log('Adjust Modal:', adjustModal);
+    console.log('Cancel Adjust Button:', cancelAdjustButton);
+    console.log('Adjust Loan Form:', adjustLoanForm);
+    console.log('Adjust Loan Amount:', adjustLoanAmount);
+    console.log('Adjust Loan Interest:', adjustLoanInterest);
+
+
+    if (loanRequestButton) {
+      loanRequestButton.onclick = function(event) {
+        event.preventDefault();
+        if (modal) modal.classList.remove("hidden");
+      };
+    }
+
+    if (cancelButton) {
+      cancelButton.onclick = function() {
+        if (modal) modal.classList.add("hidden");
+      };
+    }
+
+    if (adjustModal && adjustButtons.length) {
+      adjustButtons.forEach(button => {
+        button.addEventListener("click", function(event) {
+          event.preventDefault();
+          let loanId = button.getAttribute("data-loan-id");
+          let loanAmount = button.getAttribute("data-loan-amount");
+          let loanInterest = button.getAttribute("data-loan-interest");
+
+          if (adjustLoanForm) {
+            adjustLoanForm.action = `/loan_requests/${loanId}/adjust`;
+          }
+
+          if (adjustLoanAmount) {
+            adjustLoanAmount.value = loanAmount;
+          }
+
+          if (adjustLoanInterest) {
+            adjustLoanInterest.value = loanInterest;
+          }
+
+          if (adjustModal) {
+            adjustModal.classList.remove("hidden");
+          }
+        });
+      });
+    }
+
+    if (cancelAdjustButton) {
+      cancelAdjustButton.onclick = function() {
+        if (adjustModal) adjustModal.classList.add("hidden");
+      };
+    }
+  });
+</script>

@@ -1,0 +1,63 @@
+<div class="min-h-screen bg-[#E1C2AD] py-10 px-6">
+  <h1 class="text-2xl font-bold text-center">Loan Details</h1></br>
+    <table class="min-w-full border-collapse border border-gray-300 bg-black text-white">
+      <thead>
+        <tr class="bg-gray-800 text-white">
+          <th class="border border-gray-300 px-4 py-2">Principal Amount</th>
+          <th class="border border-gray-300 px-4 py-2">Interest Amount</th>
+          <th class="border border-gray-300 px-4 py-2">Total Amount to Repay</th>
+          <th class="border border-gray-300 px-4 py-2">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="border border-gray-300 px-4 py-2"><%= @loan_request.amount %></td>
+          <td class="border border-gray-300 px-4 py-2"><%= @loan_request.interest_amount %></td>
+          <td class="border border-gray-300 px-4 py-2"><%= @loan_request.total_amount %></td>
+          <td class="border border-gray-300 px-4 py-2">
+            <% if @loan_request.state == 'approved' %>
+              <%= link_to 'pay_loan', '#', id: 'pay-loan', data: { turbo_method: :patch }, class: 'bg-blue-700 text-white font-semibold py-2 px-4 rounded hover:bg-blue-800 mb-4'%>
+            <% end %>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+  <div class="flex items-center justify-center min-h-screen px-4 text-center">
+    <div id="loan-repay-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+      <div class="bg-white text-black rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold mb-4">Repay Loan</h3>
+        <%= form_with model: @loan_request, url: repay_loan_request_path(@loan_request), remote: true, class: 'space-y-4' do |form| %>
+          <div>
+            <%= form.label :total_amount, 'Amount', class: 'block text-sm font-medium text-gray-700' %>
+            <%= form.number_field :amount, value: @loan_request.total_amount, class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm' %>
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button type="button" id="cancel", class="bg-red-500 text-white font-semibold py-2 px-4 rounded hover:bg-red-600 mr-2">Cancel</button>
+            <%= form.submit 'Pay', id: 'repay-loan', class: 'bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600' %>
+          </div>
+        <%end%>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    let modal = document.getElementById("loan-repay-modal");
+    let payLoan = document.getElementById("pay-loan");
+    let repayLoan = document.getElementById("repay-loan")
+    payLoan.onclick = function() {
+      event.preventDefault();
+      modal.classList.remove("hidden");
+    };
+
+    document.getElementById("repay-loan").onclick = function() {
+      modal.classList.add("hidden");
+    };
+
+    document.getElementById('cancel').onclick = ()=> {
+      modal.classList.add("hidden");
+    };
+  });
+</script>

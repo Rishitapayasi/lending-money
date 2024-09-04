@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body class="bg-black text-white">
+
+  <header class="bg-gray-800 shadow-md py-10">
+    <div class="container mx-auto flex px-4">
+      <div>
+        <%= link_to 'Sign Up', new_user_registration_path, class: 'bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 ml-4' %>
+        <%= link_to 'Login', new_user_session_path, class: 'bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 ml-4' %>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex items-center justify-center min-h-screen px-2 text-center">
+    <div class="container mx-auto">
+      <h2 class="text-4xl font-bold mb-4">Lending Money with Interest</h2> 	
+      <h2 class="text-4xl font-bold mb-4">Welcome to Our Loan Management System</h2>
+      <p class="text-lg mb-6">
+        We offer a simple and efficient way to manage your loans with transparent interest rates and flexible repayment options.
+      </p>
+      <p class="text-lg mb-6">
+        Whether you're looking to borrow money for personal needs or manage your investments, our platform provides the tools you need to succeed.
+      </p>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-white text-center py-4">
+    <div class="container mx-auto">
+      <p>&copy; <%= Time.current.year %> Lending Money with Interest. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
