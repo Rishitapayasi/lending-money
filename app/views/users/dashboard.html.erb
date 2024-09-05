@@ -1,3 +1,5 @@
+<%= javascript_importmap_tags %>
+
 <div class="min-h-screen bg-[#E1C2AD] py-10 px-6">
 
   <div class="w-full flex justify-between items-center mb-4">
@@ -84,96 +86,24 @@
   </div>
 </div>
 
-  <div id="adjust-loan-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
-    <div class="bg-white text-black rounded-lg shadow-lg p-6 w-full max-w-md">
-      <h3 class="text-xl font-bold mb-4">Adjust Loan</h3>
-      <%= form_with url: '#', method: :patch, local: true, class: 'space-y-4', id: 'adjust-loan-form' do |form| %>
-        <div>
-          <%= form.label :amount, 'Amount', class: 'block text-sm font-medium text-gray-700' %>
-          <%= form.number_field :amount, id: 'adjust-loan-amount', class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm' %>
-        </div>
-        <div>
-          <%= form.label :rate_of_interest, 'Rate of Interest (%)', class: 'block text-sm font-medium text-gray-700' %>
-          <%= form.number_field :rate_of_interest, step: 0.01, id: 'adjust-loan-interest', class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm' %>
-        </div>
-        <div class="flex justify-end">
-          <button type="button" id="cancel-adjust" class="bg-red-500 text-white font-semibold py-2 px-4 rounded hover:bg-red-600 mr-2">Cancel</button>
-          <%= form.submit 'Submit Adjustment', class: 'bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600' %>
-        </div>
-      <% end %>
-    </div>
+<div id="adjust-loan-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+  <div class="bg-white text-black rounded-lg shadow-lg p-6 w-full max-w-md">
+    <h3 class="text-xl font-bold mb-4">Adjust Loan</h3>
+    <%= form_with url: '#', method: :patch, local: true, class: 'space-y-4', id: 'adjust-loan-form' do |form| %>
+      <div>
+        <%= form.label :amount, 'Amount', class: 'block text-sm font-medium text-gray-700' %>
+        <%= form.number_field :amount, id: 'adjust-loan-amount', class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm' %>
+      </div>
+      <div>
+        <%= form.label :rate_of_interest, 'Rate of Interest (%)', class: 'block text-sm font-medium text-gray-700' %>
+        <%= form.number_field :rate_of_interest, step: 0.01, id: 'adjust-loan-interest', class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm' %>
+      </div>
+      <div class="flex justify-end">
+        <button type="button" id="cancel-adjust" class="bg-red-500 text-white font-semibold py-2 px-4 rounded hover:bg-red-600 mr-2">Cancel</button>
+        <%= form.submit 'Submit Adjustment', class: 'bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600' %>
+      </div>
+    <% end %>
   </div>
-
 </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-
-    let modal = document.getElementById("loan-request-modal");
-    let loanRequestButton = document.getElementById("loan-rq");
-    let cancelButton = document.getElementById("cancel");
-    let adjustButtons = document.querySelectorAll(".adjust-loan-button");
-    let adjustModal = document.getElementById("adjust-loan-modal");
-    let cancelAdjustButton = document.getElementById("cancel-adjust");
-    let adjustLoanForm = document.getElementById("adjust-loan-form");
-    let adjustLoanAmount = document.getElementById("adjust-loan-amount");
-    let adjustLoanInterest = document.getElementById("adjust-loan-interest");
-
-    console.log('Loan Request Modal:', modal);
-    console.log('Loan Request Button:', loanRequestButton);
-    console.log('Cancel Button:', cancelButton);
-    console.log('Adjust Buttons:', adjustButtons);
-    console.log('Adjust Modal:', adjustModal);
-    console.log('Cancel Adjust Button:', cancelAdjustButton);
-    console.log('Adjust Loan Form:', adjustLoanForm);
-    console.log('Adjust Loan Amount:', adjustLoanAmount);
-    console.log('Adjust Loan Interest:', adjustLoanInterest);
-
-
-    if (loanRequestButton) {
-      loanRequestButton.onclick = function(event) {
-        event.preventDefault();
-        if (modal) modal.classList.remove("hidden");
-      };
-    }
-
-    if (cancelButton) {
-      cancelButton.onclick = function() {
-        if (modal) modal.classList.add("hidden");
-      };
-    }
-
-    if (adjustModal && adjustButtons.length) {
-      adjustButtons.forEach(button => {
-        button.addEventListener("click", function(event) {
-          event.preventDefault();
-          let loanId = button.getAttribute("data-loan-id");
-          let loanAmount = button.getAttribute("data-loan-amount");
-          let loanInterest = button.getAttribute("data-loan-interest");
-
-          if (adjustLoanForm) {
-            adjustLoanForm.action = `/loan_requests/${loanId}/adjust`;
-          }
-
-          if (adjustLoanAmount) {
-            adjustLoanAmount.value = loanAmount;
-          }
-
-          if (adjustLoanInterest) {
-            adjustLoanInterest.value = loanInterest;
-          }
-
-          if (adjustModal) {
-            adjustModal.classList.remove("hidden");
-          }
-        });
-      });
-    }
-
-    if (cancelAdjustButton) {
-      cancelAdjustButton.onclick = function() {
-        if (adjustModal) adjustModal.classList.add("hidden");
-      };
-    }
-  });
-</script>
+</div>
